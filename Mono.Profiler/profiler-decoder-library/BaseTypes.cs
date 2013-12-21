@@ -1286,7 +1286,7 @@ namespace Mono.Profiler {
 						return default (UFR);
 					}
 				} else if (middleFunction.EndOffset < offset) {
-					if (middleIndex < functions.Count - 1) {
+					if (middleIndex < functions.Count - 1 && middleIndex > lowIndex) {
 						lowIndex = middleIndex;
 					} else {
 						return default (UFR);
