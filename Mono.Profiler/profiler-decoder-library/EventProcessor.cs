@@ -337,16 +337,15 @@ namespace  Mono.Profiler {
 					lastCalleeNode = statisticalItemsByCaller.AddChild (caller);
 				}
 				
+				result = (currentChainIndex == 0);
 				currentChain [currentChainIndex] = caller;
 				currentChainIndex ++;
 				
 				if (remainingCallersInChain > 0) {
 					//Console.WriteLine ("HandleCallChain[{0}]  {1} on {2}", remainingCallersInChain, caller.Name, lastCallee.Name);
 					remainingCallersInChain --;
-					result = false;
 				} else {
 					//Console.WriteLine ("HandleCallChain[{0}] {1}", remainingCallersInChain, caller.Name);
-					result = true;
 					
 					StatisticalHitItemTreeNode currentNode = statisticalItemsByCallee;
 					while (currentChainIndex > 0) {
