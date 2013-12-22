@@ -32,14 +32,16 @@ namespace Mono.Profiler.Widgets {
 		
 			static List<Node> children = new List<Node> ();
 			IStatisticalHitItem item;
+			uint calls;
 			
 			public static Comparison<Node> CompareByHits = delegate (Node a, Node b) {
-				return (b as StatNode).item.StatisticalHits.CompareTo ((a as StatNode).item.StatisticalHits);
+				return (b as StatNode).CumulativeValue.CompareTo ((a as StatNode).CumulativeValue);
 			};
 
-			public StatNode (ProfileStore store, Node parent, IStatisticalHitItem item) : base (store, parent)
+			public StatNode (ProfileStore store, Node parent, IStatisticalHitItem item, uint calls) : base (store, parent)
 			{
 				this.item = item;
+				this.calls = calls;
 			}
 			
 			public override List<Node> Children {
@@ -57,6 +59,10 @@ namespace Mono.Profiler.Widgets {
 			public override ulong Value {
 				get { return item.StatisticalHits; }
 			}
+
+			public ulong CumulativeValue {
+				get { return item.StatisticalHits + calls; }
+			}
 		}
 		
 		ulong total_hits;
@@ -65,10 +71,16 @@ namespace Mono.Profiler.Widgets {
 		{
 			nodes = new List<Node> ();
 			foreach (IStatisticalHitItem item in data.StatisticalHitItems) {
-				if (item.StatisticalHits <= 0)
+				uint calls = 0;
+				if (item.HasCallCounts) {
+					foreach (var call in item.CallCounts.Callees)
+						if (call.Item != item)
+							calls += call.Calls;
+				}
+				if (item.StatisticalHits <= 0 && calls <= 0)
 					continue;
 				total_hits += item.StatisticalHits;
-				nodes.Add (new StatNode (this, null, item));
+				nodes.Add (new StatNode (this, null, item, calls));
 			}
 			nodes.Sort (StatNode.CompareByHits);
 		}
@@ -84,6 +96,10 @@ namespace Mono.Profiler.Widgets {
 				val = new GLib.Value (node.Name);
 			else if (column == 1) {
 				double percent = (double) node.Value / (double) total_hits * 100.0;
+				val = new GLib.Value (String.Format ("{0,5:F2}%", percent));
+			}
+			else if (column == 2) {
+				double percent = (double) ((StatNode)node).CumulativeValue / (double) total_hits * 100.0;
 				val = new GLib.Value (String.Format ("{0,5:F2}%", percent));
 			}
 		}		

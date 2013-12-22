@@ -35,7 +35,8 @@ namespace Mono.Profiler.Widgets {
 			store = new StatStore (data, options);
 			Model = new TreeModelAdapter (store);
 			Selection.SelectPath (new TreePath ("0"));
-			AppendColumn ("Percent", new CellRendererText (), "text", 1);
+			AppendColumn ("Self", new CellRendererText (), "text", 1);
+			AppendColumn ("Total", new CellRendererText (), "text", 2);
 			TreeViewColumn col = new TreeViewColumn ("Method", new CellRendererText (), "text", 0);
 			AppendColumn (col);
 			ExpanderColumn = col;
