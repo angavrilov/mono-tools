@@ -44,7 +44,7 @@ namespace  Mono.Profiler {
 			statisticalHits ++;
 		}
 		
-		public string Name {
+		public virtual string Name {
 			get {
 				return "[UNKNOWN MEMORY REGION]";
 			}
@@ -70,10 +70,19 @@ namespace  Mono.Profiler {
 		}
 	}
 	
+	class UnknownMethodStatisticalHitsCollector : UnknownStatisticalHitsCollector {
+		public override string Name {
+			get {
+				return "[UNKNOWN METHOD]";
+			}
+		}
+	}
+
 	public class ProfilerEventHandler : BaseProfilerEventHandler<LoadedClass,LoadedMethod,UnmanagedFunctionFromRegion,UnmanagedFunctionFromID,ExecutableMemoryRegion,LoadedElementHandler<LoadedClass,LoadedMethod,UnmanagedFunctionFromRegion,UnmanagedFunctionFromID,ExecutableMemoryRegion,HeapObject,HeapSnapshot>,HeapObject,HeapSnapshot> {
 		Dictionary<ulong,CallStack> perThreadStacks;
 		CallStack stack;
 		UnknownStatisticalHitsCollector unknownStatisticalHitsCollector;
+		UnknownMethodStatisticalHitsCollector unknownMethodStatisticalHitsCollector;
 		GlobalMonitorStatistics globalMonitorStatistics;
 		
 		public GlobalMonitorStatistics GlobalMonitorStatistics {
@@ -405,6 +414,11 @@ namespace  Mono.Profiler {
 				unknownStatisticalHitsCollector.IncrementStatisticalHits ();
 			}
 		}
+		public override void UnknownMethodStatisticalHit () {
+			if (HandleCallChain (unknownMethodStatisticalHitsCollector)) {
+				unknownMethodStatisticalHitsCollector.IncrementStatisticalHits ();
+			}
+		}
 		
 		public override void ThreadStart (ulong threadId, ulong counter) {}
 		public override void ThreadEnd (ulong threadId, ulong counter) {}
@@ -421,7 +435,7 @@ namespace  Mono.Profiler {
 					regionFunctions [i] = region.Functions;
 					resultIndex += regionFunctions [i].Length;
 				}
-				IStatisticalHitItem[] result = new IStatisticalHitItem [resultIndex + methods.Length + idFunctions.Length + regions.Length + 1];
+				IStatisticalHitItem[] result = new IStatisticalHitItem [resultIndex + methods.Length + idFunctions.Length + regions.Length + 2];
 				
 				resultIndex = 0;
 				for (int i = 0; i < regions.Length; i++) {
@@ -435,7 +449,8 @@ namespace  Mono.Profiler {
 				resultIndex += idFunctions.Length;
 				Array.ConstrainedCopy (regions, 0, result, resultIndex, regions.Length);
 				resultIndex += regions.Length;
-				result [resultIndex] = unknownStatisticalHitsCollector;
+				result [resultIndex++] = unknownStatisticalHitsCollector;
+				result [resultIndex++] = unknownMethodStatisticalHitsCollector;
 				
 				return result;
 			}
@@ -692,6 +707,7 @@ namespace  Mono.Profiler {
 			stack = null;
 			stackTraceFactory = new StackTrace.Factory ();
 			unknownStatisticalHitsCollector = new UnknownStatisticalHitsCollector ();
+			unknownMethodStatisticalHitsCollector = new UnknownMethodStatisticalHitsCollector ();
 			gcStatistics = new List<GcStatistics> ();
 			pendingGcStatistics = new List<GcStatistics> ();
 			currentGcStatistics = null;
