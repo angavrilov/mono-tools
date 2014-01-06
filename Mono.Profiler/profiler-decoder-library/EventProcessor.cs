@@ -40,6 +40,15 @@ namespace  Mono.Profiler {
 				statisticalHits = value;
 			}
 		}
+		uint cumulativeStatisticalHits;
+		public uint CumulativeStatisticalHits {
+			get {
+				return cumulativeStatisticalHits;
+			}
+			set {
+				cumulativeStatisticalHits = value;
+			}
+		}
 		internal void IncrementStatisticalHits () {
 			statisticalHits ++;
 		}
@@ -67,6 +76,7 @@ namespace  Mono.Profiler {
 		
 		public UnknownStatisticalHitsCollector () {
 			statisticalHits = 0;
+			cumulativeStatisticalHits = 0;
 		}
 	}
 	
@@ -346,6 +356,16 @@ namespace  Mono.Profiler {
 					lastCalleeNode = statisticalItemsByCaller.AddChild (caller);
 				}
 				
+				bool recursive = false;
+				for (int i = 0; i < currentChainIndex; i++) {
+					if (currentChain [i] != caller)
+						continue;
+					recursive = true;
+					break;
+				}
+				if (!recursive)
+					caller.CumulativeStatisticalHits++;
+
 				result = (currentChainIndex == 0);
 				currentChain [currentChainIndex] = caller;
 				currentChainIndex ++;
@@ -370,6 +390,7 @@ namespace  Mono.Profiler {
 				
 				return result;
 			} else {
+				caller.CumulativeStatisticalHits++;
 				return true;
 			}
 		}

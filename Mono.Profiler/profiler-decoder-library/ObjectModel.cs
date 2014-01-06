@@ -725,6 +725,7 @@ namespace  Mono.Profiler {
 	public interface IStatisticalHitItem {
 		string Name {get;}
 		uint StatisticalHits {get;}
+		uint CumulativeStatisticalHits {get; set;}
 		bool HasCallCounts {get;}
 		StatisticalHitItemCallCounts CallCounts {get;}
 	}
@@ -858,6 +859,15 @@ namespace  Mono.Profiler {
 			}
 			internal set {
 				statisticalHits = value;
+			}
+		}
+		uint cumulativeStatisticalHits;
+		public uint CumulativeStatisticalHits {
+			get {
+				return cumulativeStatisticalHits;
+			}
+			set {
+				cumulativeStatisticalHits = value;
 			}
 		}
 		string IStatisticalHitItem.Name {
@@ -1030,6 +1040,7 @@ namespace  Mono.Profiler {
 			calledClicks = 0;
 			jitClicks = 0;
 			statisticalHits = 0;
+			cumulativeStatisticalHits = 0;
 		}
 	}
 	
@@ -1041,6 +1052,15 @@ namespace  Mono.Profiler {
 			}
 			internal set {
 				statisticalHits = value;
+			}
+		}
+		uint cumulativeStatisticalHits;
+		public uint CumulativeStatisticalHits {
+			get {
+				return cumulativeStatisticalHits;
+			}
+			set {
+				cumulativeStatisticalHits = value;
 			}
 		}
 		
@@ -1067,6 +1087,7 @@ namespace  Mono.Profiler {
 		
 		public UnmanagedFunctionFromID (uint id, string name, ExecutableMemoryRegion region) : base (id, name, region) {
 			statisticalHits = 0;
+			cumulativeStatisticalHits = 0;
 		}
 	}
 	
@@ -1080,9 +1101,19 @@ namespace  Mono.Profiler {
 				statisticalHits = value;
 			}
 		}
+		uint cumulativeStatisticalHits;
+		public uint CumulativeStatisticalHits {
+			get {
+				return cumulativeStatisticalHits;
+			}
+			set {
+				cumulativeStatisticalHits = value;
+			}
+		}
 		
 		public UnmanagedFunctionFromRegion () {
 			statisticalHits = 0;
+			cumulativeStatisticalHits = 0;
 		}
 		
 		StatisticalHitItemCallCounts callCounts;
@@ -1118,6 +1149,15 @@ namespace  Mono.Profiler {
 				statisticalHits = value;
 			}
 		}
+		uint cumulativeStatisticalHits;
+		public uint CumulativeStatisticalHits {
+			get {
+				return cumulativeStatisticalHits;
+			}
+			set {
+				cumulativeStatisticalHits = value;
+			}
+		}
 		internal void IncrementStatisticalHits () {
 			statisticalHits ++;
 		}
@@ -1145,6 +1185,7 @@ namespace  Mono.Profiler {
 		
 		public ExecutableMemoryRegion (uint id, string name, uint fileOffset, ulong startAddress, ulong endAddress) : base (id, name, fileOffset, startAddress, endAddress) {
 				statisticalHits = 0;
+				cumulativeStatisticalHits = 0;
 		}
 	}
 	

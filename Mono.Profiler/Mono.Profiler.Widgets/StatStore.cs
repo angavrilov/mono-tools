@@ -32,16 +32,14 @@ namespace Mono.Profiler.Widgets {
 		
 			static List<Node> children = new List<Node> ();
 			IStatisticalHitItem item;
-			uint calls;
 			
 			public static Comparison<Node> CompareByHits = delegate (Node a, Node b) {
 				return (b as StatNode).CumulativeValue.CompareTo ((a as StatNode).CumulativeValue);
 			};
 
-			public StatNode (ProfileStore store, Node parent, IStatisticalHitItem item, uint calls) : base (store, parent)
+			public StatNode (ProfileStore store, Node parent, IStatisticalHitItem item) : base (store, parent)
 			{
 				this.item = item;
-				this.calls = calls;
 			}
 			
 			public override List<Node> Children {
@@ -61,7 +59,7 @@ namespace Mono.Profiler.Widgets {
 			}
 
 			public ulong CumulativeValue {
-				get { return item.StatisticalHits + calls; }
+				get { return item.CumulativeStatisticalHits; }
 			}
 		}
 		
@@ -71,16 +69,10 @@ namespace Mono.Profiler.Widgets {
 		{
 			nodes = new List<Node> ();
 			foreach (IStatisticalHitItem item in data.StatisticalHitItems) {
-				uint calls = 0;
-				if (item.HasCallCounts) {
-					foreach (var call in item.CallCounts.Callees)
-						if (call.Item != item)
-							calls += call.Calls;
-				}
-				if (item.StatisticalHits <= 0 && calls <= 0)
+				if (item.StatisticalHits <= 0 && item.CumulativeStatisticalHits <= 0)
 					continue;
 				total_hits += item.StatisticalHits;
-				nodes.Add (new StatNode (this, null, item, calls));
+				nodes.Add (new StatNode (this, null, item));
 			}
 			nodes.Sort (StatNode.CompareByHits);
 		}
