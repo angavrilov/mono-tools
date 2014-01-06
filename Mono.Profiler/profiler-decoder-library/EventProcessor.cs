@@ -383,7 +383,7 @@ namespace  Mono.Profiler {
 			if (currentChain != null) {
 				Array.Clear (currentChain, 0, currentChain.Length);
 			} else {
-				currentChain = new IStatisticalHitItem [32];
+				currentChain = new IStatisticalHitItem [128+1];
 			}
 			//Console.WriteLine ("StatisticalCallChainStart ({0})", chainDepth);
 		}
